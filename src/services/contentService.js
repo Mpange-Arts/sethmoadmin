@@ -1,16 +1,21 @@
 const API_URL = process.env.REACT_APP_API_URL || 'https://sethmoserver.onrender.com/api';
 
-// Helper function to extract error messages from the backend
+// Helper function to extract error messages from the backend safely
 const handleFetchError = async (res) => {
   let errorMessage = `Server error: ${res.status} ${res.statusText}`;
+  
+  // Read the response body as plain text FIRST so we only consume the stream once
+  const text = await res.text(); 
+  
   try {
-    const errorData = await res.json();
+    // Try to parse that text as JSON
+    const errorData = JSON.parse(text);
     errorMessage = errorData.message || errorData.error || errorMessage;
   } catch (e) {
-    // If it's not JSON, try to get plain text
-    const errorText = await res.text();
-    if (errorText) errorMessage = errorText;
+    // If it's not JSON (like an HTML error page from Render), use the raw text
+    if (text) errorMessage = text.substring(0, 150); // Truncate so it doesn't flood your screen
   }
+  
   throw new Error(errorMessage);
 };
 
