@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL || 'https://sethmoserver.onrender.com';
+const API_URL = process.env.REACT_APP_API_URL || 'https://sethmoserver.onrender.com/api';
 
 // Helper function to extract error messages from the backend
 const handleFetchError = async (res) => {
