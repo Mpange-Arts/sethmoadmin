@@ -24,6 +24,7 @@ const HeroManager = () => {
         const data = await getHeroSettings();
         setFormData(data);
       } catch (err) {
+        console.error("Fetch settings error:", err);
         setStatus({ type: 'error', message: 'Failed to load settings' });
       } finally {
         setLoading(false);
@@ -45,15 +46,28 @@ const HeroManager = () => {
     if (!file) return;
 
     try {
-      setStatus({ type: 'info', message: 'Uploading...' });
-      const { url } = await uploadHeroFile(file);
+      setStatus({ type: 'info', message: `Uploading ${file.name}...` });
+      console.log(`Starting upload for ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+      
+      const response = await uploadHeroFile(file);
+      console.log("Server upload response:", response);
+
+      // Extract URL safely based on common backend response patterns
+      const fileUrl = response.url || response.fileUrl || response.data?.url || response.imageUrl || response.videoUrl;
+
+      if (!fileUrl) {
+        throw new Error("Upload succeeded, but no URL was found in the server response.");
+      }
+
       // Update the appropriate URL field
-      setFormData({ ...formData, [type === 'video' ? 'videoUrl' : 'imageUrl']: url });
+      setFormData({ ...formData, [type === 'video' ? 'videoUrl' : 'imageUrl']: fileUrl });
       setStatus({ type: 'success', message: 'File uploaded successfully!' });
     } catch (err) {
-      setStatus({ type: 'error', message: 'Upload failed' });
+      console.error("Upload failed:", err);
+      // Display the actual error message from the backend/fetch catch
+      setStatus({ type: 'error', message: `Upload failed: ${err.message}` });
     } finally {
-      setTimeout(() => setStatus({ type: '', message: '' }), 3000);
+      setTimeout(() => setStatus({ type: '', message: '' }), 5000); // Increased to 5s to read errors easily
     }
   };
 
@@ -63,6 +77,7 @@ const HeroManager = () => {
       await updateHeroSettings(formData);
       setStatus({ type: 'success', message: 'Settings saved successfully!' });
     } catch (err) {
+      console.error("Save settings error:", err);
       setStatus({ type: 'error', message: 'Failed to save settings' });
     } finally {
       setSaving(false);
