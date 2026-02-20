@@ -13,8 +13,14 @@ const Login = () => {
     setLoading(true);
     setError('');
 
+    // This automatically switches between your local backend and your live Render backend
+    const API_URL = process.env.NODE_ENV === 'production' 
+      ? 'https://sethmoserver.onrender.com' 
+      : 'http://localhost:5000';
+
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      // Pointing to the specific login endpoint on your server
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -32,6 +38,7 @@ const Login = () => {
         setError(data.error || 'Invalid credentials');
       }
     } catch (err) {
+      console.error("Login fetch error:", err); // Logs the exact error in the browser console
       setError("Server connection failed. Is the backend running?");
     } finally {
       setLoading(false);
