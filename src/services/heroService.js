@@ -1,7 +1,7 @@
 // src/services/heroService.js
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://sethmoserver.onrender.com';
 
 export const getHeroSettings = () => 
   axios.get(`${API_URL}/hero`).then(res => res.data);
